@@ -21,16 +21,30 @@ public class HolodexVideosApiClient {
     private String referer;
     @Value("${name.holodex-videos-api-client.user-agent}")
     private String userAgent;
+    @Value("${name.holodex-videos-api-client.query.status}")
+    private String status;
+    @Value("${name.holodex-videos-api-client.query.paginated}")
+    private boolean paginated;
+    @Value("${name.holodex-videos-api-client.query.max_upcoming_hours}")
+    private int maxUpcomingHours;
+    @Value("${name.holodex-videos-api-client.query.org}")
+    private String org;
+    @Value("${name.holodex-videos-api-client.query.type}")
+    private String type;
+    @Value("${name.holodex-videos-api-client.query.limit}")
+    private int limit;
+    @Value("${name.holodex-videos-api-client.query.offset}")
+    private int offset;
 
-    public List<Video> fetchVideoList() {
+    public List<Video> fetchRecentVideos() {
         UriComponentsBuilder builder = UriComponentsBuilder.fromUri(URI.create(url))
-                .queryParam("status", "past,missing,live,upcoming")
-                .queryParam("paginated", false)
-                .queryParam("max_upcoming_hours", 24)
-                .queryParam("org", "Hololive")
-                .queryParam("type", "stream")
-                .queryParam("limit", 50)
-                .queryParam("offset", 0);
+                .queryParam("status", status)
+                .queryParam("paginated", paginated)
+                .queryParam("max_upcoming_hours", maxUpcomingHours)
+                .queryParam("org", org)
+                .queryParam("type", type)
+                .queryParam("limit", limit)
+                .queryParam("offset", offset);
         var uri = builder.build().encode().toUri();
         var response = restClient.get()
                 .uri(uri)

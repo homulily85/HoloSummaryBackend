@@ -36,7 +36,7 @@ public class VideoService {
     }
 
     public List<Video> getVideosFromHolodex() {
-        return holodexVideosApiClient.fetchVideoList();
+        return holodexVideosApiClient.fetchRecentVideos();
     }
 
 }

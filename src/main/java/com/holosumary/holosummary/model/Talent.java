@@ -1,6 +1,7 @@
 package com.holosumary.holosummary.model;
 
 import com.fasterxml.jackson.annotation.JsonAlias;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import lombok.Data;
@@ -15,6 +16,9 @@ public class Talent {
 
     @JsonAlias("english_name")
     private String englishName;
+
+    @JsonIgnore
+    private String groupName;
 
     private String photo;
 }

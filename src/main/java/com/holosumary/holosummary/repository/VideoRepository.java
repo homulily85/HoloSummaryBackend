@@ -6,9 +6,12 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.time.OffsetDateTime;
+import java.util.Optional;
 
 public interface VideoRepository extends JpaRepository<Video, String> {
     Page<Video> findAll(Pageable pageable);
+
+    Optional<Video> findById(String id);
 
     Page<Video> findByStatus(String status, Pageable pageable);
 
