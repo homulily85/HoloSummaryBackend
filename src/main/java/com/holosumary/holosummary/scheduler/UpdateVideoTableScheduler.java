@@ -32,9 +32,24 @@ public class UpdateVideoTableScheduler {
 
     @Scheduled(cron = "0 0/5 * * * ?")
     public void fetchVideosAndUpdateVideoDatabase() {
-        log.info("Cron job ran");
 
+        log.info("Fetching videos from Holodex API.");
+
+        var fetch_start = System.currentTimeMillis();
         var fetchedVideos = holodexVideosApiClient.fetchRecentVideos();
+        var fetch_end = System.currentTimeMillis();
+
+        log.info("Finished fetching videos from Holodex API. Time used %d ms"
+                .formatted(fetch_end - fetch_start));
+
+        if (fetchedVideos == null || fetchedVideos.isEmpty()) {
+            log.info("No video is fetched.");
+            return;
+        }
+
+        log.info("Started updating video database.");
+
+        var update_start = System.currentTimeMillis();
 
         // Holodex API may mistakenly include some independent vtubers so we need to filter them.
         Set<String> talentIds = fetchedVideos.stream()
@@ -55,5 +70,9 @@ public class UpdateVideoTableScheduler {
                 .toList();
 
         videoRepository.saveAll(toSave);
+
+        var update_end = System.currentTimeMillis();
+        log.info("Finished updating video database. Time used %d ms"
+                .formatted(update_end - update_start));
     }
 }

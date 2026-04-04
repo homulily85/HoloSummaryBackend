@@ -17,4 +17,6 @@ public interface VideoRepository extends JpaRepository<Video, String> {
 
     Page<Video> findByAvailableAtAfter(OffsetDateTime availableAtAfter, Pageable pageable);
 
+    Page<Video> findByStatusAndAvailableAtAfter(String status, OffsetDateTime availableAtAfter,
+                                                Pageable pageable);
 }
