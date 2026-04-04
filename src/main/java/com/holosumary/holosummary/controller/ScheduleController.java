@@ -2,6 +2,7 @@ package com.holosumary.holosummary.controller;
 
 import com.holosumary.holosummary.model.Video;
 import com.holosumary.holosummary.service.VideoService;
+import lombok.AllArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
@@ -12,13 +13,10 @@ import org.springframework.web.bind.annotation.RestController;
 import java.time.OffsetDateTime;
 
 @RestController()
+@AllArgsConstructor
 public class ScheduleController {
 
     private final VideoService videoService;
-
-    public ScheduleController(VideoService videoService) {
-        this.videoService = videoService;
-    }
 
     @GetMapping("/schedule")
     public ResponseEntity<Page<Video>> getSchedule(

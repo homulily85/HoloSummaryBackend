@@ -14,7 +14,7 @@ import java.util.List;
 
 @Component
 public class HolodexVideosApiClient {
-    private final RestClient restClient = RestClient.create();
+    private final RestClient restClient;
     @Value("${name.holodex-videos-api-client.url}")
     private String url;
     @Value("${name.holodex-videos-api-client.referer}")
@@ -35,6 +35,10 @@ public class HolodexVideosApiClient {
     private int limit;
     @Value("${name.holodex-videos-api-client.query.offset}")
     private int offset;
+
+    public HolodexVideosApiClient(RestClient restClient) {
+        this.restClient = restClient;
+    }
 
     public List<Video> fetchRecentVideos() {
         UriComponentsBuilder builder = UriComponentsBuilder.fromUri(URI.create(url))
