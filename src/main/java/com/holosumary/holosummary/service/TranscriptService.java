@@ -1,7 +1,6 @@
 package com.holosumary.holosummary.service;
 
 import com.holosumary.holosummary.client.TranscriptCrawlerApiClient;
-import com.holosumary.holosummary.client.dto.TranscriptCrawlerResponseDTO;
 import com.holosumary.holosummary.exception.NotFoundException;
 import com.holosumary.holosummary.model.Transcript;
 import com.holosumary.holosummary.repository.TranscriptsRepository;
@@ -25,23 +24,15 @@ public class TranscriptService {
         }
 
         List<Transcript> oldTranscript =
-                transcriptsRepository.findByVideoAndLanguageCode(video.get(),
-                        languageCode);
+                transcriptsRepository.findByVideoAndLanguageCode(video.get(), languageCode);
 
         if (oldTranscript.isEmpty()) {
-            TranscriptCrawlerResponseDTO dto = apiClient.fetchTranscript(videoId, languageCode);
+            var transcript = apiClient.fetchTranscript(videoId, languageCode);
 
-            if (dto == null) {
+            if (transcript == null) {
                 throw new NotFoundException("");
             }
 
-            Transcript transcript = new Transcript();
-            transcript.setText(dto.getText());
-            transcript.setLanguageCode(dto.getLanguageCode());
-            transcript.setLanguage(dto.getLanguage());
-            transcript.setGenerated(dto.isGenerated());
-
-            transcript.setVideo(video.get());
             return transcriptsRepository.save(transcript);
         } else return oldTranscript.get(0);
 
