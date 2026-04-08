@@ -8,10 +8,12 @@ services:
       - "8080:8080"
     environment:
       - SPRING_PROFILES_ACTIVE=dev
-      - SPRING_DATASOURCE_URL=
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://db:5432/holo_summary
       - SPRING_DATASOURCE_USERNAME=
       - SPRING_DATASOURCE_PASSWORD=
-      - TRANSCRIPTION_API_URL=http://transcript-crawler:8000/api/transcript
+      - TRANSCRIPTION_API_URL=http://host.docker.internal:8000/api/transcript
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     volumes:
       - ./:/app
       - maven-cache:/root/.m2
@@ -24,18 +26,23 @@ services:
       context: ./python-transcript-crawler
       dockerfile: Dockerfile
     container_name: transcript-crawler
+    network_mode: host
+    volumes:
+      - ./python-transcript-crawler:/app
 
   db:
     image: postgres:17.9
-    container_name: spring-boot-dev-db
+    container_name: holo-summary-dev-db
     environment:
       POSTGRES_USER:
       POSTGRES_PASSWORD:
-      POSTGRES_DB:
+      POSTGRES_DB: holo_summary
+    ports:
+      - "5432:5432"
     volumes:
       - postgres-data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U {your_usename} -d {your_dbname}"]
+      test: ["CMD-SHELL", "pg_isready -U {your_username} -d {your_database}"]
       interval: 10s
       timeout: 5s
       retries: 5
