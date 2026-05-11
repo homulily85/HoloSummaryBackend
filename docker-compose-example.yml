@@ -1,9 +1,9 @@
 services:
-  app:
+  holo-summary:
     build:
       context: .
       dockerfile: Dockerfile
-    container_name: holo-summary-dev
+    container_name: holo-summary
     ports:
       - "8080:8080"
     environment:
@@ -32,7 +32,7 @@ services:
 
   db:
     image: postgres:17.9
-    container_name: holo-summary-dev-db
+    container_name: holo-summary-db
     environment:
       POSTGRES_USER:
       POSTGRES_PASSWORD:
@@ -42,7 +42,7 @@ services:
     volumes:
       - postgres-data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U {your_username} -d {your_database}"]
+      test: ["CMD-SHELL", "pg_isready -U {your_username} -d holo-summary-db"]
       interval: 10s
       timeout: 5s
       retries: 5

@@ -1,17 +1,11 @@
-FROM eclipse-temurin:21-jdk-alpine
+FROM maven:3.9-eclipse-temurin-21-alpine
 
 WORKDIR /app
 
-COPY .mvn/ .mvn
+COPY pom.xml .
 
-COPY mvnw pom.xml ./
-
-RUN chmod +x ./mvnw
-
-RUN ./mvnw dependency:go-offline
+RUN mvn dependency:go-offline
 
 COPY src ./src
 
-EXPOSE 8080
-
-CMD ["./mvnw", "spring-boot:run"]
+CMD ["mvn", "spring-boot:run"]
