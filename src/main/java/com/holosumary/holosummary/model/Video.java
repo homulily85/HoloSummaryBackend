@@ -1,13 +1,11 @@
 package com.holosumary.holosummary.model;
 
 import com.fasterxml.jackson.annotation.JsonAlias;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
+import jakarta.persistence.*;
 import lombok.Data;
 
 import java.time.OffsetDateTime;
+import java.util.List;
 
 @Data
 @Entity
@@ -30,8 +28,15 @@ public class Video {
     private OffsetDateTime availableAt;
 
     @ManyToOne
-    @JoinColumn(name = "talent_id")
-    @JsonAlias("channel")
-    private Talent talent;
+    @JoinColumn(name = "channel_id")
+    private Channel channel;
+
+    @ManyToMany
+    @JoinTable(
+            name = "video_mentions",
+            joinColumns = @JoinColumn(name = "video_id"),
+            inverseJoinColumns = @JoinColumn(name = "channel_id")
+    )
+    private List<Channel> mentions;
 
 }

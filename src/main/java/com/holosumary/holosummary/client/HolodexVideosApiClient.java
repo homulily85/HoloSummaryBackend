@@ -1,7 +1,7 @@
 package com.holosumary.holosummary.client;
 
-import com.holosumary.holosummary.client.dto.HolodexApiResponseDTO;
-import com.holosumary.holosummary.model.Video;
+import com.holosumary.holosummary.dto.HolodexApiResponseDTO;
+import com.holosumary.holosummary.dto.VideoDTO;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.stereotype.Component;
@@ -15,32 +15,34 @@ import java.util.List;
 @Component
 public class HolodexVideosApiClient {
     private final RestClient restClient;
-    @Value("${name.holodex-videos-api-client.url}")
+    @Value("${holodex-videos-api-client.url}")
     private String url;
-    @Value("${name.holodex-videos-api-client.referer}")
+    @Value("${holodex-videos-api-client.header.referer}")
     private String referer;
-    @Value("${name.holodex-videos-api-client.user-agent}")
+    @Value("${holodex-videos-api-client.header.user-agent}")
     private String userAgent;
-    @Value("${name.holodex-videos-api-client.query.status}")
+    @Value("${holodex-videos-api-client.query.status}")
     private String status;
-    @Value("${name.holodex-videos-api-client.query.paginated}")
+    @Value("${holodex-videos-api-client.query.paginated}")
     private boolean paginated;
-    @Value("${name.holodex-videos-api-client.query.max_upcoming_hours}")
+    @Value("${holodex-videos-api-client.query.max_upcoming_hours}")
     private int maxUpcomingHours;
-    @Value("${name.holodex-videos-api-client.query.org}")
+    @Value("${holodex-videos-api-client.query.org}")
     private String org;
-    @Value("${name.holodex-videos-api-client.query.type}")
+    @Value("${holodex-videos-api-client.query.type}")
     private String type;
-    @Value("${name.holodex-videos-api-client.query.limit}")
+    @Value("${holodex-videos-api-client.query.limit}")
     private int limit;
-    @Value("${name.holodex-videos-api-client.query.offset}")
+    @Value("${holodex-videos-api-client.query.offset}")
     private int offset;
+    @Value("${holodex-videos-api-client.query.include}")
+    private String include;
 
     public HolodexVideosApiClient(RestClient restClient) {
         this.restClient = restClient;
     }
 
-    public List<Video> fetchRecentVideos() {
+    public List<VideoDTO> fetchRecentVideos() {
         UriComponentsBuilder builder = UriComponentsBuilder.fromUri(URI.create(url))
                 .queryParam("status", status)
                 .queryParam("paginated", paginated)
@@ -48,8 +50,10 @@ public class HolodexVideosApiClient {
                 .queryParam("org", org)
                 .queryParam("type", type)
                 .queryParam("limit", limit)
-                .queryParam("offset", offset);
+                .queryParam("offset", offset)
+                .queryParam("include", include);
         var uri = builder.build().encode().toUri();
+
         var response = restClient.get()
                 .uri(uri)
                 .header("Referer", referer)

@@ -8,7 +8,7 @@ import lombok.Data;
 
 @Data
 @Entity
-public class Talent {
+public class Channel {
     @Id
     private String id;
 

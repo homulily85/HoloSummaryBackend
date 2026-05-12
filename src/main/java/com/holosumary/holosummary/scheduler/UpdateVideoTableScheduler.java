@@ -1,9 +1,9 @@
 package com.holosumary.holosummary.scheduler;
 
 import com.holosumary.holosummary.client.HolodexVideosApiClient;
-import com.holosumary.holosummary.model.Talent;
+import com.holosumary.holosummary.model.Channel;
 import com.holosumary.holosummary.model.Video;
-import com.holosumary.holosummary.repository.TalentRepository;
+import com.holosumary.holosummary.repository.ChannelRepository;
 import com.holosumary.holosummary.repository.VideoRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -12,7 +12,6 @@ import org.springframework.stereotype.Component;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -20,17 +19,17 @@ import java.util.stream.Collectors;
 public class UpdateVideoTableScheduler {
     private final HolodexVideosApiClient holodexVideosApiClient;
     private final VideoRepository videoRepository;
-    private final TalentRepository talentRepository;
+    private final ChannelRepository channelRepository;
 
     public UpdateVideoTableScheduler(HolodexVideosApiClient holodexVideosApiClient,
                                      VideoRepository videoRepository,
-                                     TalentRepository talentRepository) {
+                                     ChannelRepository channelRepository) {
         this.holodexVideosApiClient = holodexVideosApiClient;
         this.videoRepository = videoRepository;
-        this.talentRepository = talentRepository;
+        this.channelRepository = channelRepository;
     }
 
-    @Scheduled(cron = "0 0/5 * * * ?")
+    @Scheduled(cron = "0 0/1 * * * ?")
     public void fetchVideosAndUpdateVideoDatabase() {
 
         log.info("Fetching videos from Holodex API.");
@@ -51,23 +50,42 @@ public class UpdateVideoTableScheduler {
 
         var update_start = System.currentTimeMillis();
 
-        // Holodex API may mistakenly include some independent vtubers so we need to filter them.
-        Set<String> talentIds = fetchedVideos.stream()
-                .map(Video::getTalent)
-                .filter(Objects::nonNull)
-                .map(Talent::getId)
-                .filter(Objects::nonNull)
-                .collect(Collectors.toSet());
-
-        Map<String, Talent> existingTalents = talentRepository.findAllById(talentIds).stream()
-                .collect(Collectors.toMap(Talent::getId, t -> t));
+        // Filter for non-holo channel
+        Map<String, Channel> existingChannels = channelRepository.findAll().stream()
+                .collect(Collectors.toMap(Channel::getId, t -> t));
 
         List<Video> toSave = fetchedVideos.stream()
-                .filter(v -> {
-                    Talent t = v.getTalent();
-                    return t == null || existingTalents.containsKey(t.getId());
-                })
-                .toList();
+                .map(v -> {
+                            var t = v.getChannel();
+                            if (t == null || t.getId() == null) {
+                                return null;
+                            }
+                            var channel = existingChannels.getOrDefault(t.getId(), null);
+                            if (channel == null) {
+                                return null;
+                            }
+
+                            var video = new Video();
+                            video.setId(v.getId());
+                            video.setTitle(v.getTitle());
+                            video.setType(v.getType());
+                            video.setTopic(v.getTopic());
+                            video.setDuration(v.getDuration());
+                            video.setStatus(v.getStatus());
+                            video.setAvailableAt(v.getAvailableAt());
+                            video.setChannel(channel);
+                            if (v.getMentions() == null || v.getMentions().isEmpty()) {
+                                video.setMentions(List.of());
+                            } else {
+                                video.setMentions(v.getMentions().stream()
+                                        .map(m -> existingChannels.getOrDefault(m.getId(), null))
+                                        .filter(Objects::nonNull)
+                                        .collect(Collectors.toList()));
+                            }
+                            return video;
+                        }
+                )
+                .filter(Objects::nonNull).toList();
 
         videoRepository.saveAll(toSave);
 

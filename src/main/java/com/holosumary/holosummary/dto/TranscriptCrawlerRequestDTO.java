@@ -1,16 +1,13 @@
-package com.holosumary.holosummary.client.dto;
+package com.holosumary.holosummary.dto;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 
 @Data
 @AllArgsConstructor
 public class TranscriptCrawlerRequestDTO {
-    @JsonProperty("video_id")
     private String videoId;
 
-    @JsonProperty("language_code")
     private String languageCode;
 
 }

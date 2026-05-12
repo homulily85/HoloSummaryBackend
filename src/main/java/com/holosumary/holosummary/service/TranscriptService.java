@@ -1,7 +1,7 @@
 package com.holosumary.holosummary.service;
 
 import com.holosumary.holosummary.client.TranscriptCrawlerApiClient;
-import com.holosumary.holosummary.client.dto.TranscriptCrawlerResponseDTO;
+import com.holosumary.holosummary.dto.TranscriptCrawlerResponseDTO;
 import com.holosumary.holosummary.exception.NotFoundException;
 import com.holosumary.holosummary.model.Transcript;
 import com.holosumary.holosummary.repository.TranscriptsRepository;

@@ -6,8 +6,8 @@ app = FastAPI()
 
 
 class RequestBody(BaseModel):
-    video_id: str
-    language_code: str
+    videoId: str
+    languageCode: str
 
 
 def process_transcript_snippets(transcript):
@@ -21,16 +21,11 @@ def process_transcript_snippets(transcript):
 async def fetch_transcript(request_body: RequestBody):
     try:
         ytt_api = YouTubeTranscriptApi()
-        fetched_transcript = ytt_api.fetch(request_body.video_id, languages=[request_body.language_code])
-        print({"text": process_transcript_snippets(fetched_transcript),
-                              "video_id": fetched_transcript.video_id,
-                              "language_code": fetched_transcript.language_code,
-                              "language": fetched_transcript.language,
-                              "is_generated": fetched_transcript.is_generated})
+        fetched_transcript = ytt_api.fetch(request_body.videoId, languages=[request_body.languageCode])
         return {"text": process_transcript_snippets(fetched_transcript),
-                "video_id": fetched_transcript.video_id,
-                "language_code": fetched_transcript.language_code,
+                "videoId": fetched_transcript.video_id,
+                "languageCode": fetched_transcript.language_code,
                 "language": fetched_transcript.language,
-                "is_generated": fetched_transcript.is_generated}
+                "isGenerated": fetched_transcript.is_generated}
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
