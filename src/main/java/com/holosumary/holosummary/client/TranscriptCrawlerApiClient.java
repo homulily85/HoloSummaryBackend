@@ -2,9 +2,6 @@ package com.holosumary.holosummary.client;
 
 import com.holosumary.holosummary.client.dto.TranscriptCrawlerRequestDTO;
 import com.holosumary.holosummary.client.dto.TranscriptCrawlerResponseDTO;
-import com.holosumary.holosummary.model.Transcript;
-import com.holosumary.holosummary.model.TranscriptSnippet;
-import com.holosumary.holosummary.model.Video;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.MediaType;
@@ -23,8 +20,8 @@ public class TranscriptCrawlerApiClient {
         this.restClient = restClient;
     }
 
-    public Transcript fetchTranscript(String videoId, String languageCode) {
-        TranscriptCrawlerResponseDTO responseDto = restClient
+    public TranscriptCrawlerResponseDTO fetchTranscript(String videoId, String languageCode) {
+        return restClient
                 .post()
                 .uri(url)
                 .contentType(MediaType.APPLICATION_JSON)
@@ -33,35 +30,5 @@ public class TranscriptCrawlerApiClient {
                 .retrieve()
                 .body(new ParameterizedTypeReference<>() {
                 });
-
-        if (responseDto == null) {
-            return null;
-        }
-
-        return mapToEntity(responseDto);
-    }
-
-    private Transcript mapToEntity(TranscriptCrawlerResponseDTO dto) {
-        Transcript transcript = new Transcript();
-        transcript.setLanguage(dto.getLanguage());
-        transcript.setLanguageCode(dto.getLanguageCode());
-        transcript.setGenerated(dto.isGenerated());
-
-        Video videoRef = new Video();
-        videoRef.setId(dto.getVideoId());
-        transcript.setVideo(videoRef);
-
-        if (dto.getSnippets() != null) {
-            for (TranscriptCrawlerResponseDTO.Snippet snippetDto : dto.getSnippets()) {
-                TranscriptSnippet snippet = new TranscriptSnippet();
-                snippet.setText(snippetDto.getText());
-                snippet.setStart(snippetDto.getStart());
-                snippet.setEnd(snippetDto.getEnd());
-
-                transcript.addSnippet(snippet);
-            }
-        }
-
-        return transcript;
     }
 }
