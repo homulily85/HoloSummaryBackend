@@ -1,4 +1,4 @@
-package com.holosumary.holosummary.dto;
+package com.holosumary.holosummary.dto.transcript;
 
 import lombok.Data;
 

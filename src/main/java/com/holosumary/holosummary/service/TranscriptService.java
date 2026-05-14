@@ -1,15 +1,13 @@
 package com.holosumary.holosummary.service;
 
 import com.holosumary.holosummary.client.TranscriptCrawlerApiClient;
-import com.holosumary.holosummary.dto.TranscriptCrawlerResponseDTO;
+import com.holosumary.holosummary.dto.transcript.TranscriptCrawlerResponseDTO;
 import com.holosumary.holosummary.exception.NotFoundException;
 import com.holosumary.holosummary.model.Transcript;
 import com.holosumary.holosummary.repository.TranscriptsRepository;
 import com.holosumary.holosummary.repository.VideoRepository;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
-
-import java.util.List;
 
 @Service
 @AllArgsConstructor
@@ -24,11 +22,11 @@ public class TranscriptService {
             throw new NotFoundException("");
         }
 
-        List<Transcript> oldTranscript =
+        Transcript oldTranscript =
                 transcriptsRepository.findByVideoAndLanguageCode(video.get(),
                         languageCode);
 
-        if (oldTranscript.isEmpty()) {
+        if (oldTranscript == null) {
             TranscriptCrawlerResponseDTO dto = apiClient.fetchTranscript(videoId, languageCode);
 
             if (dto == null) {
@@ -43,7 +41,7 @@ public class TranscriptService {
 
             transcript.setVideo(video.get());
             return transcriptsRepository.save(transcript);
-        } else return oldTranscript.get(0);
+        } else return oldTranscript;
 
     }
 }

@@ -1,4 +1,4 @@
-package com.holosumary.holosummary.dto;
+package com.holosumary.holosummary.dto.holodex;
 
 import com.fasterxml.jackson.annotation.JsonAlias;
 import lombok.Data;

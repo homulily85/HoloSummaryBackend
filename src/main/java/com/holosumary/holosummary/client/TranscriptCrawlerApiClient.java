@@ -1,7 +1,7 @@
 package com.holosumary.holosummary.client;
 
-import com.holosumary.holosummary.dto.TranscriptCrawlerRequestDTO;
-import com.holosumary.holosummary.dto.TranscriptCrawlerResponseDTO;
+import com.holosumary.holosummary.dto.transcript.TranscriptCrawlerRequestDTO;
+import com.holosumary.holosummary.dto.transcript.TranscriptCrawlerResponseDTO;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.MediaType;

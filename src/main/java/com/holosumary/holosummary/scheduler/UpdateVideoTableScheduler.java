@@ -29,7 +29,7 @@ public class UpdateVideoTableScheduler {
         this.channelRepository = channelRepository;
     }
 
-    @Scheduled(cron = "0 0/1 * * * ?")
+    @Scheduled(cron = "0 0/5 * * * ?")
     public void fetchVideosAndUpdateVideoDatabase() {
 
         log.info("Fetching videos from Holodex API.");

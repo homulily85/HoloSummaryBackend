@@ -1,7 +1,7 @@
 package com.holosumary.holosummary.client;
 
-import com.holosumary.holosummary.dto.HolodexApiResponseDTO;
-import com.holosumary.holosummary.dto.VideoDTO;
+import com.holosumary.holosummary.dto.holodex.HolodexApiResponseDTO;
+import com.holosumary.holosummary.dto.holodex.VideoDTO;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.stereotype.Component;

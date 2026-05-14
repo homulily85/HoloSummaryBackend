@@ -28,7 +28,7 @@ public class ScheduleController {
             @RequestParam(value = "available-after", required = false)
             @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) OffsetDateTime availableAfter) {
 
-        pageSize = Math.max(1, Math.min(pageSize, 100));
+        pageSize = Math.clamp(pageSize, 1, 100);
         pageNumber = Math.max(0, pageNumber);
 
         int mask = (status != null ? 1 : 0) | (availableAfter != null ? 2 : 0);
