@@ -26,7 +26,6 @@ services:
       context: ./python-transcript-crawler
       dockerfile: Dockerfile
     container_name: transcript-crawler
-    network_mode: host
     volumes:
       - ./python-transcript-crawler:/app
 

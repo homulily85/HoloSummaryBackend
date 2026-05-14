@@ -30,7 +30,7 @@ async def fetch_transcript(request_body: RequestBody):
     except RequestBlocked:
         raise HTTPException(status_code=403, detail="Request blocked by YouTube. Please try again later.")
     except IpBlocked:
-        raise HTTPException(status_code=403, detail="IP blocked by YouTube. Please try again later.")
+        raise HTTPException(status_code=500, detail="The IP transcript crawler service is blocked by YouTube. Please try again later.")
     except NoTranscriptFound:
         raise HTTPException(status_code=404, detail="No transcript found for the given video ID and language code.")
     except TranscriptsDisabled:

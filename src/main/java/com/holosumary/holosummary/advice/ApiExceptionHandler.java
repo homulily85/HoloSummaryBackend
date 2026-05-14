@@ -4,6 +4,8 @@ import com.holosumary.holosummary.exception.ExternalServiceException;
 import com.holosumary.holosummary.exception.NotFoundException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.ConstraintViolationException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.FieldError;
@@ -17,6 +19,7 @@ import java.util.List;
 
 @RestControllerAdvice
 public class ApiExceptionHandler {
+    private static final Logger logger = LoggerFactory.getLogger(ApiExceptionHandler.class);
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ApiError> handleMethodArgumentNotValid(MethodArgumentNotValidException ex,
@@ -54,8 +57,13 @@ public class ApiExceptionHandler {
     @ExceptionHandler(ExternalServiceException.class)
     public ResponseEntity<ApiError> handleExternalService(ExternalServiceException ex,
                                                           HttpServletRequest request) {
-        return ResponseEntity.status(HttpStatus.BAD_GATEWAY)
-                .body(new ApiError(ex.getMessage(), "Bad Gateway", request.getRequestURI(),
+        logger.warn("External service error at {}: {}", request.getRequestURI(),
+                ex.getResponseBody());
+
+        HttpStatus status = ex.getStatus();
+        return ResponseEntity.status(status)
+                .body(new ApiError(ex.getMessage(), status.getReasonPhrase(),
+                        request.getRequestURI(),
                         Instant.now(), List.of()));
     }
 
