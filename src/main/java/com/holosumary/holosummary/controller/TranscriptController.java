@@ -2,6 +2,9 @@ package com.holosumary.holosummary.controller;
 
 import com.holosumary.holosummary.model.Transcript;
 import com.holosumary.holosummary.service.TranscriptService;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import org.springframework.http.ResponseEntity;
@@ -17,7 +20,7 @@ public class TranscriptController {
     private final TranscriptService transcriptService;
 
     @PostMapping("/transcript")
-    public ResponseEntity<Transcript> getTranscript(@RequestBody RequestDTO request) {
+    public ResponseEntity<Transcript> getTranscript(@Valid @RequestBody RequestDTO request) {
         var transcript = transcriptService.getTranscript(request.getVideoId(),
                 request.getLanguageCode());
 
@@ -26,8 +29,12 @@ public class TranscriptController {
 
     @Data
     public static class RequestDTO {
+        @NotBlank
+        @Size(max = 11, min = 11)
         private String videoId;
 
+        @NotBlank
+        @Size(max = 5)
         private String languageCode;
     }
 

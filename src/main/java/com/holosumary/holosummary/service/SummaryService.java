@@ -1,6 +1,7 @@
 package com.holosumary.holosummary.service;
 
 import com.holosumary.holosummary.client.OpenRouterApiClient;
+import com.holosumary.holosummary.exception.ExternalServiceException;
 import com.holosumary.holosummary.exception.NotFoundException;
 import com.holosumary.holosummary.model.Summary;
 import com.holosumary.holosummary.repository.SummaryRepository;
@@ -19,7 +20,7 @@ public class SummaryService {
     public Summary getSummary(String videoId) {
         var video = videoRepository.findById(videoId);
         if (video.isEmpty()) {
-            throw new NotFoundException("");
+            throw new NotFoundException("Video not found: " + videoId);
         }
 
         var oldSummary = summaryRepository.getSummariesByVideo(video.get());
@@ -27,14 +28,10 @@ public class SummaryService {
         if (oldSummary == null) {
             var transcript = transcriptService.getTranscript(videoId, "ja");
 
-            if (transcript == null) {
-                throw new NotFoundException("");
-            }
-
             var dto = openRouterApiClient.fetchSummary(transcript);
 
             if (dto == null) {
-                throw new RuntimeException("Failed to fetch summary from OpenRouter API");
+                throw new ExternalServiceException("Failed to fetch summary from OpenRouter API");
             }
 
             Summary summary = new Summary();

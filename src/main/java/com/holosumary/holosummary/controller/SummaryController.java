@@ -2,6 +2,9 @@ package com.holosumary.holosummary.controller;
 
 import com.holosumary.holosummary.model.Summary;
 import com.holosumary.holosummary.service.SummaryService;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import org.springframework.http.ResponseEntity;
@@ -17,13 +20,15 @@ public class SummaryController {
     private final SummaryService summaryService;
 
     @PostMapping("/summary")
-    public ResponseEntity<Summary> getSummary(@RequestBody RequestDTO request) {
+    public ResponseEntity<Summary> getSummary(@Valid @RequestBody RequestDTO request) {
         var summary = summaryService.getSummary(request.getVideoId());
         return ResponseEntity.ok().body(summary);
     }
 
     @Data
     public static class RequestDTO {
+        @NotBlank
+        @Size(max = 11, min = 11)
         private String videoId;
     }
 }

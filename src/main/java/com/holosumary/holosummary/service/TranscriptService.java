@@ -19,7 +19,7 @@ public class TranscriptService {
     public Transcript getTranscript(String videoId, String languageCode) {
         var video = videoRepository.findById(videoId);
         if (video.isEmpty()) {
-            throw new NotFoundException("");
+            throw new NotFoundException("Video not found: " + videoId);
         }
 
         Transcript oldTranscript =
@@ -30,7 +30,8 @@ public class TranscriptService {
             TranscriptCrawlerResponseDTO dto = apiClient.fetchTranscript(videoId, languageCode);
 
             if (dto == null) {
-                throw new NotFoundException("");
+                throw new NotFoundException("Transcript not found for video: " + videoId +
+                        " (language: " + languageCode + ")");
             }
 
             Transcript transcript = new Transcript();
