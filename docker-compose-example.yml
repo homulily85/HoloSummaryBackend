@@ -11,9 +11,7 @@ services:
       - SPRING_DATASOURCE_URL=jdbc:postgresql://db:5432/holo_summary
       - SPRING_DATASOURCE_USERNAME=
       - SPRING_DATASOURCE_PASSWORD=
-      - TRANSCRIPTION_API_URL=http://host.docker.internal:8000/api/transcript
-    extra_hosts:
-      - "host.docker.internal:host-gateway"
+      - TRANSCRIPTION_API_URL=http://transcript-crawler:8000/api/transcript
     volumes:
       - ./:/app
       - maven-cache:/root/.m2
@@ -36,8 +34,6 @@ services:
       POSTGRES_USER:
       POSTGRES_PASSWORD:
       POSTGRES_DB: holo_summary
-    ports:
-      - "5432:5432"
     volumes:
       - postgres-data:/var/lib/postgresql/data
     healthcheck:
