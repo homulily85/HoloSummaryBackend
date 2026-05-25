@@ -13,6 +13,7 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.client.HttpClientErrorException;
+import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 import java.time.Instant;
 import java.util.List;
@@ -57,10 +58,14 @@ public class ApiExceptionHandler {
     @ExceptionHandler(ExternalServiceException.class)
     public ResponseEntity<ApiError> handleExternalService(ExternalServiceException ex,
                                                           HttpServletRequest request) {
-        logger.warn("External service error at {}: {}", request.getRequestURI(),
-                ex.getResponseBody());
-
         HttpStatus status = ex.getStatus();
+
+        if (status.is5xxServerError()) {
+            logger.error("External service 5xx error at {}: {}", request.getRequestURI(), ex.getResponseBody(), ex);
+        } else {
+            logger.warn("External service error at {}: {}", request.getRequestURI(), ex.getResponseBody());
+        }
+
         return ResponseEntity.status(status)
                 .body(new ApiError(ex.getMessage(), status.getReasonPhrase(),
                         request.getRequestURI(),
@@ -70,15 +75,28 @@ public class ApiExceptionHandler {
     @ExceptionHandler(HttpClientErrorException.class)
     public ResponseEntity<ApiError> handleHttpClientError(HttpClientErrorException ex,
                                                           HttpServletRequest request) {
+        logger.error("HTTP client error at {}: {}", request.getRequestURI(), ex.getResponseBodyAsString(), ex);
+
         return ResponseEntity.status(ex.getStatusCode())
                 .body(new ApiError(ex.getStatusText(), ex.getStatusCode().toString(),
                         request.getRequestURI(), Instant.now(), List.of()));
     }
 
     @ExceptionHandler(Exception.class)
-    public ResponseEntity<ApiError> handleUnexpected(HttpServletRequest request) {
+    public ResponseEntity<ApiError> handleUnexpected(Exception ex, HttpServletRequest request) {
+
+        logger.error("Unexpected server error at {}", request.getRequestURI(), ex);
+
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                 .body(new ApiError("Unexpected server error", "Internal Server Error",
+                        request.getRequestURI(), Instant.now(), List.of()));
+    }
+
+    @ExceptionHandler(NoResourceFoundException.class)
+    public ResponseEntity<ApiError> handleNoResourceFound(NoResourceFoundException ex,
+                                                          HttpServletRequest request) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                .body(new ApiError("Endpoint not found", "Not Found",
                         request.getRequestURI(), Instant.now(), List.of()));
     }
 

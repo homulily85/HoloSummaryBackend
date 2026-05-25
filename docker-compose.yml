@@ -13,6 +13,10 @@ services:
       - SPRING_DATASOURCE_PASSWORD=${DB_PASSWORD}
       - TRANSCRIPTION_API_URL=http://transcript-crawler:8000/api/transcript
       - OPEN_ROUTER_API_KEY=${OPEN_ROUTER_API_KEY}
+      - GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID}
+      - GOOGLE_CLIENT_SECRET=${GOOGLE_CLIENT_SECRET}
+      - JWT_SECRET_KEY=${JWT_SECRET_KEY}
+      - FRONTEND_URL=${FRONTEND_URL}
     volumes:
       - ./:/app
       - maven-cache:/root/.m2
