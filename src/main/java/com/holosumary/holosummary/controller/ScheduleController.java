@@ -5,6 +5,7 @@ import com.holosumary.holosummary.service.VideoService;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.Size;
+import org.springframework.web.bind.annotation.PathVariable;
 import lombok.AllArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -51,5 +52,11 @@ public class ScheduleController {
         };
 
         return ResponseEntity.ok(videos);
+    }
+
+    @GetMapping("/schedule/{id}")
+    public ResponseEntity<Video> getVideo(@PathVariable String id) {
+        Video video = videoService.getVideoById(id);
+        return ResponseEntity.ok(video);
     }
 }

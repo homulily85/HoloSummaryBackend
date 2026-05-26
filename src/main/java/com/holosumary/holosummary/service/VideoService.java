@@ -1,5 +1,6 @@
 package com.holosumary.holosummary.service;
 
+import com.holosumary.holosummary.exception.NotFoundException;
 import com.holosumary.holosummary.model.Video;
 import com.holosumary.holosummary.repository.VideoRepository;
 import lombok.AllArgsConstructor;
@@ -44,4 +45,8 @@ public class VideoService {
                         Sort.Direction.ASC : Sort.Direction.DESC, sortBy)));
     }
 
+    public Video getVideoById(String id) {
+        return videoRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("Video not found with id: " + id));
+    }
 }
