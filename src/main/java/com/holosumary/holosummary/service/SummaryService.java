@@ -9,6 +9,11 @@ import com.holosumary.holosummary.repository.VideoRepository;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
+
 @Service
 @AllArgsConstructor
 public class SummaryService {
@@ -17,17 +22,31 @@ public class SummaryService {
     private final TranscriptService transcriptService;
     private final OpenRouterApiClient openRouterApiClient;
 
+    // Store locks per videoId
+    private final ConcurrentMap<String, Lock> locks = new ConcurrentHashMap<>();
+
     public Summary getSummary(String videoId) {
-        var video = videoRepository.findById(videoId);
-        if (video.isEmpty()) {
-            throw new NotFoundException("Video not found: " + videoId);
+        var video = videoRepository.findById(videoId)
+                .orElseThrow(() -> new NotFoundException("Video not found: " + videoId));
+
+        // 1st Check (Fast path without locking)
+        var oldSummary = summaryRepository.getSummariesByVideo(video);
+        if (oldSummary != null) {
+            return oldSummary;
         }
 
-        var oldSummary = summaryRepository.getSummariesByVideo(video.get());
+        // Acquire lock for this specific videoId
+        Lock lock = locks.computeIfAbsent(videoId, k -> new ReentrantLock());
+        lock.lock();
+        try {
+            // 2nd Check (Inside lock: in case another thread just finished generating it)
+            oldSummary = summaryRepository.getSummariesByVideo(video);
+            if (oldSummary != null) {
+                return oldSummary;
+            }
 
-        if (oldSummary == null) {
+            // Generate summary via OpenRouter API
             var transcript = transcriptService.getTranscript(videoId, "ja");
-
             var dto = openRouterApiClient.fetchSummary(transcript);
 
             if (dto == null) {
@@ -36,14 +55,15 @@ public class SummaryService {
 
             Summary summary = new Summary();
             summary.setText(dto.getChoices().getFirst().getMessage().getContent());
-            summary.setVideo(video.get());
+            summary.setVideo(video);
             summary.setPromptTokens(dto.getUsage().getPromptTokens());
             summary.setCompletionTokens(dto.getUsage().getCompletionTokens());
             summary.setTotalTokens(dto.getUsage().getTotalTokens());
             summary.setModel(dto.getModel());
 
             return summaryRepository.save(summary);
+        } finally {
+            lock.unlock();
         }
-        return oldSummary;
     }
 }

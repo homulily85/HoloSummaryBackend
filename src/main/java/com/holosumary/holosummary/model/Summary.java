@@ -8,6 +8,7 @@ import lombok.Data;
 @Data
 public class Summary {
     @Id
+    @JsonIgnore
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
