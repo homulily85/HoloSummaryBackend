@@ -6,21 +6,41 @@ on:
       - main
 
 jobs:
-  deploy:
+  build-and-deploy:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write # Required to push compiled images to GHCR
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v5
 
-      - name: Copy backend files to Server
+      # 1. Log in to GitHub Container Registry on the GitHub Runner
+      - name: Log in to GitHub Container Registry (GHCR)
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }} # Automatically provided by GitHub
+
+      # 2. Build the images and push them to the registry
+      - name: Build and Push Docker Images
+        run: |
+          docker compose build
+          docker compose push
+
+      # 3. Only copy the configuration files to the server (no source code needed!)
+      - name: Copy docker-compose and configs to Server
         uses: appleboy/scp-action@v0.1.7
         with:
           host: ${{ secrets.SERVER_HOST }}
           username: ${{ secrets.SERVER_USERNAME }}
           key: ${{ secrets.SERVER_SSH_KEY }}
-          source: "."
+          source: "prod.docker-compose.yml" # Add any other needed configs here, comma-separated (e.g., "docker-compose.yml,nginx.conf")
           target: "/opt/holosummary-backend/"
 
+      # 4. Connect to the server, authenticate, pull, and run
       - name: Execute Docker Compose on Server
         uses: appleboy/ssh-action@v1.0.3
         with:
@@ -30,7 +50,7 @@ jobs:
           script: |
             cd /opt/holosummary-backend/
             
-            # 1. Create/Overwrite the .env file with secrets from GitHub
+            # Create/Overwrite the .env file with secrets from GitHub
             echo "DB_USERNAME=${{ secrets.DB_USERNAME }}" > .env
             echo "DB_PASSWORD=${{ secrets.DB_PASSWORD }}" >> .env
             echo "OPEN_ROUTER_API_KEY=${{ secrets.OPEN_ROUTER_API_KEY }}" >> .env
@@ -39,9 +59,14 @@ jobs:
             echo "JWT_SECRET_KEY=${{ secrets.JWT_SECRET_KEY }}" >> .env
             echo "FRONTEND_URL=${{ secrets.FRONTEND_URL }}" >> .env
             
-            # 2. Pull, rebuild, and restart containers
-            docker compose pull
-            docker compose up -d --build
+            # Log the server into GHCR so it has permission to pull your private image
+            echo "${{ secrets.GHCR_PAT }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
             
-            # 3. Clean up old images
+            # Pull the pre-built images from GHCR
+            docker compose pull
+            
+            # Start containers (Notice the --build flag is GONE)
+            docker compose up -d
+            
+            # Clean up old images
             docker image prune -f

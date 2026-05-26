@@ -3,6 +3,8 @@ services:
     build:
       context: .
       dockerfile: prod.Dockerfile
+    image: ghcr.io/homulily85/holosummary:latest
+
     container_name: holo-summary
     ports:
       - "127.0.0.1:8080:8080" # Secured: Only accessible via Nginx proxy
@@ -27,6 +29,7 @@ services:
       context: ./python-transcript-crawler
       dockerfile: Dockerfile
     container_name: transcript-crawler
+    image: ghcr.io/homulily85/transcript-crawler:latest
     restart: unless-stopped
 
   db:
