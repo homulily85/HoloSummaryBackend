@@ -19,7 +19,7 @@ jobs:
           username: ${{ secrets.SERVER_USERNAME }}
           key: ${{ secrets.SERVER_SSH_KEY }}
           source: "."
-          target: "/opt/holo-summary-backend/"
+          target: "/opt/holosummary-backend/"
           # Exclude git folder and target folder to save upload time
           rm: true
 
