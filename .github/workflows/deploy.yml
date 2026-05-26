@@ -20,8 +20,6 @@ jobs:
           key: ${{ secrets.SERVER_SSH_KEY }}
           source: "."
           target: "/opt/holosummary-backend/"
-          # Exclude git folder and target folder to save upload time
-          rm: true
 
       - name: Execute Docker Compose on Server
         uses: appleboy/ssh-action@v1.0.3
