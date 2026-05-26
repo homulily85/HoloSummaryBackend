@@ -1,0 +1,49 @@
+services:
+  holo-summary:
+    build:
+      context: .
+      dockerfile: prod.Dockerfile
+    container_name: holo-summary
+    ports:
+      - "127.0.0.1:8080:8080" # Secured: Only accessible via Nginx proxy
+    environment:
+      - SPRING_PROFILES_ACTIVE=prod
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://db:5432/holo_summary
+      - SPRING_DATASOURCE_USERNAME=${DB_USERNAME}
+      - SPRING_DATASOURCE_PASSWORD=${DB_PASSWORD}
+      - TRANSCRIPTION_API_URL=http://transcript-crawler:8000/api/transcript
+      - OPEN_ROUTER_API_KEY=${OPEN_ROUTER_API_KEY}
+      - GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID}
+      - GOOGLE_CLIENT_SECRET=${GOOGLE_CLIENT_SECRET}
+      - JWT_SECRET_KEY=${JWT_SECRET_KEY}
+      - FRONTEND_URL=${FRONTEND_URL}
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: unless-stopped
+
+  transcript-crawler:
+    build:
+      context: ./python-transcript-crawler
+      dockerfile: Dockerfile
+    container_name: transcript-crawler
+    restart: unless-stopped
+
+  db:
+    image: postgres:17.9
+    container_name: holo-summary-db
+    environment:
+      POSTGRES_USER: ${DB_USERNAME}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: holo_summary
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USERNAME} -d holo_summary"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+volumes:
+  postgres-data:
