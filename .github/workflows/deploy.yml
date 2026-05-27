@@ -18,7 +18,7 @@ jobs:
 
       # 1. Log in to GitHub Container Registry on the GitHub Runner
       - name: Log in to GitHub Container Registry (GHCR)
-        uses: docker/login-action@v3
+        uses: docker/login-action@v4
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
