@@ -72,11 +72,9 @@ jobs:
             # Log the server into GHCR so it has permission to pull your private image
             echo "${{ secrets.GHCR_PAT }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
             
-            # Pull the pre-built images from GHCR
-            docker compose pull
-            
-            # Start containers (Notice the --build flag is GONE)
-            docker compose up -d
+            # Pull and start using the specific prod file
+            docker compose -f prod.docker-compose.yml pull
+            docker compose -f prod.docker-compose.yml up -d
             
             # Clean up old images
             docker image prune -f
