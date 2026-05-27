@@ -2,7 +2,8 @@ import os
 import requests
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
-from youtube_transcript_api import YouTubeTranscriptApi, RequestBlocked, IpBlocked, NoTranscriptFound, TranscriptsDisabled, VideoUnavailable, VideoUnplayable
+from youtube_transcript_api import YouTubeTranscriptApi, RequestBlocked, IpBlocked, NoTranscriptFound, \
+    TranscriptsDisabled, VideoUnavailable, VideoUnplayable
 from youtube_transcript_api.proxies import GenericProxyConfig
 
 app = FastAPI()
@@ -11,18 +12,20 @@ WINDOWS_TAILSCALE_IP = os.getenv("WINDOWS_TAILSCALE_IP", "127.0.0.1").strip()
 PROXY_PORT = os.getenv("PROXY_PORT", "8899").strip()
 
 tailscale_proxy_config = GenericProxyConfig(
-    http_url= f"http://{WINDOWS_TAILSCALE_IP}:{PROXY_PORT}",
-    https_url= f"http://{WINDOWS_TAILSCALE_IP}:{PROXY_PORT}"
+    http_url=f"http://{WINDOWS_TAILSCALE_IP}:{PROXY_PORT}",
+    https_url=f"http://{WINDOWS_TAILSCALE_IP}:{PROXY_PORT}"
 )
+
 
 class RequestBody(BaseModel):
     videoId: str
     languageCode: str
 
+
 def process_transcript_snippets(transcript_data):
     text = ""
     for snippet in transcript_data:
-        text += snippet['text'] + " "
+        text += snippet.text + " "
     return text.strip()
 
 @app.post("/api/transcript")
@@ -46,7 +49,8 @@ async def fetch_transcript(request_body: RequestBody):
     except RequestBlocked:
         raise HTTPException(status_code=403, detail="Request blocked by YouTube. Please try again later.")
     except IpBlocked:
-        raise HTTPException(status_code=500, detail="The IP transcript crawler service is blocked by YouTube. Please try again later.")
+        raise HTTPException(status_code=500,
+                            detail="The IP transcript crawler service is blocked by YouTube. Please try again later.")
     except NoTranscriptFound:
         raise HTTPException(status_code=404, detail="No transcript found for the given video ID and language code.")
     except TranscriptsDisabled:
