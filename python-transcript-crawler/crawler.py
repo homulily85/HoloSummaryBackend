@@ -32,7 +32,7 @@ async def fetch_transcript(request_body: RequestBody):
     try:
         ytt_api = YouTubeTranscriptApi(proxy_config=tailscale_proxy_config)
 
-        transcript_list = ytt_api.list_transcripts(request_body.videoId)
+        transcript_list = ytt_api.list(request_body.videoId)
 
         transcript = transcript_list.find_transcript([request_body.languageCode])
         fetched_data = transcript.fetch()
