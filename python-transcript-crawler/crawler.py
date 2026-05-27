@@ -1,6 +1,5 @@
 import os
 import requests
-import logging
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 from youtube_transcript_api import YouTubeTranscriptApi, RequestBlocked, IpBlocked, NoTranscriptFound, TranscriptsDisabled, VideoUnavailable, VideoUnplayable
@@ -15,11 +14,6 @@ tailscale_proxy_config = GenericProxyConfig(
     http_url= f"http://{WINDOWS_TAILSCALE_IP}:{PROXY_PORT}",
     https_url= f"https://{WINDOWS_TAILSCALE_IP}:{PROXY_PORT}"
 )
-
-logging.basicConfig(level=logging.INFO)
-
-logging.info(f"http://{WINDOWS_TAILSCALE_IP}:{PROXY_PORT}")
-logging.info(f"https://{WINDOWS_TAILSCALE_IP}:{PROXY_PORT}")
 
 class RequestBody(BaseModel):
     videoId: str
