@@ -29,6 +29,9 @@ services:
       context: ./python-transcript-crawler
       dockerfile: Dockerfile
     container_name: transcript-crawler
+    environment:
+      - WINDOWS_TAILSCALE_IP=${WINDOWS_TAILSCALE_IP}
+      - PROXY_PORT=${PROXY_PORT}
     image: ghcr.io/homulily85/transcript-crawler:latest
     restart: unless-stopped
 

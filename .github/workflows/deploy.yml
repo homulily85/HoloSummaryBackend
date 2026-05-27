@@ -33,6 +33,8 @@ jobs:
           echo "GOOGLE_CLIENT_SECRET=${{ secrets.GOOGLE_CLIENT_SECRET }}" >> .env
           echo "JWT_SECRET_KEY=${{ secrets.JWT_SECRET_KEY }}" >> .env
           echo "FRONTEND_URL=${{ secrets.FRONTEND_URL }}" >> .env
+          echo "WINDOWS_TAILSCALE_IP=${{ secrets.WINDOWS_TAILSCALE_IP }}" >> .env
+          echo "PROXY_PORT=${{ secrets.PROXY_PORT }}" >> .env
 
       # 2. Build the images and push them to the registry
       - name: Build and Push Docker Images
