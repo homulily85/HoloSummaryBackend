@@ -10,12 +10,12 @@ app = FastAPI()
 WINDOWS_TAILSCALE_IP = os.getenv("WINDOWS_TAILSCALE_IP", "127.0.0.1")
 PROXY_PORT = os.getenv("PROXY_PORT", "8899")
 
-PROXY_URL = f"http://{WINDOWS_TAILSCALE_IP}:{PROXY_PORT}"
-
 tailscale_proxy_config = GenericProxyConfig(
-    http_url=PROXY_URL,
-    https_url=PROXY_URL
+    http_url= f"http://{WINDOWS_TAILSCALE_IP}:{PROXY_PORT}",
+    https_url= f"https://{WINDOWS_TAILSCALE_IP}:{PROXY_PORT}"
 )
+
+print(tailscale_proxy_config)
 
 class RequestBody(BaseModel):
     videoId: str
