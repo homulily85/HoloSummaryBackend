@@ -7,12 +7,12 @@ from youtube_transcript_api.proxies import GenericProxyConfig
 
 app = FastAPI()
 
-WINDOWS_TAILSCALE_IP = os.getenv("WINDOWS_TAILSCALE_IP", "127.0.0.1")
-PROXY_PORT = os.getenv("PROXY_PORT", "8899")
+WINDOWS_TAILSCALE_IP = os.getenv("WINDOWS_TAILSCALE_IP", "127.0.0.1").strip()
+PROXY_PORT = os.getenv("PROXY_PORT", "8899").strip()
 
 tailscale_proxy_config = GenericProxyConfig(
     http_url= f"http://{WINDOWS_TAILSCALE_IP}:{PROXY_PORT}",
-    https_url= f"https://{WINDOWS_TAILSCALE_IP}:{PROXY_PORT}"
+    https_url= f"http://{WINDOWS_TAILSCALE_IP}:{PROXY_PORT}"
 )
 
 class RequestBody(BaseModel):
