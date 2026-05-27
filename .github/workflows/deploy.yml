@@ -37,8 +37,8 @@ jobs:
       # 2. Build the images and push them to the registry
       - name: Build and Push Docker Images
         run: |
-          docker compose build
-          docker compose push
+          docker compose -f prod.docker-compose.yml build
+          docker compose -f prod.docker-compose.yml push
 
       # 3. Only copy the configuration files to the server (no source code needed!)
       - name: Copy docker-compose and configs to Server
