@@ -26,18 +26,23 @@ public class JwtService {
         return Keys.hmacShaKeyFor(keyBytes);
     }
 
-    public String generateAccessToken(String email) {
+    public String generateAccessToken(String userId, String role,
+                                      String pictureUrl) {
         return Jwts.builder()
-                .subject(email)
+                .subject(userId)
+                .claim("role", role)
+                .claim("pictureUrl", pictureUrl)
                 .issuedAt(new Date())
                 .expiration(new Date(System.currentTimeMillis() + accessTokenExpiration))
                 .signWith(getSigningKey())
                 .compact();
     }
 
-    public String generateRefreshToken(String email, String pictureUrl) {
+    public String generateRefreshToken(String userId, String role,
+                                       String pictureUrl) {
         return Jwts.builder()
-                .subject(email)
+                .subject(userId)
+                .claim("role", role)
                 .claim("picture", pictureUrl)
                 .issuedAt(new Date())
                 .expiration(new Date(System.currentTimeMillis() + refreshTokenExpiration))
@@ -45,12 +50,16 @@ public class JwtService {
                 .compact();
     }
 
-    public String extractEmail(String token) {
+    public String extractUserId(String token) {
         return getClaims(token).getSubject();
     }
 
     public String extractPicture(String token) {
         return getClaims(token).get("picture", String.class);
+    }
+
+    public String extractRole(String token) {
+        return getClaims(token).get("role", String.class);
     }
 
     public boolean isTokenValid(String token) {

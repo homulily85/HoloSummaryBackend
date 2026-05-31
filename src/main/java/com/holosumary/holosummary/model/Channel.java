@@ -1,9 +1,10 @@
 package com.holosumary.holosummary.model;
 
 import com.fasterxml.jackson.annotation.JsonAlias;
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import lombok.Data;
 
 @Data
@@ -17,8 +18,9 @@ public class Channel {
     @JsonAlias("english_name")
     private String englishName;
 
-    @JsonIgnore
-    private String groupName;
+    @ManyToOne
+    @JoinColumn(name = "group_id")
+    private Group group;
 
     private String photo;
 }

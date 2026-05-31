@@ -27,11 +27,11 @@ public class AuthController {
     public ResponseEntity<?> refreshToken(@CookieValue(name = "refresh_token", required = false) String refreshToken) {
 
         if (refreshToken != null && jwtService.isTokenValid(refreshToken)) {
-            String email = jwtService.extractEmail(refreshToken);
-
+            String userId = jwtService.extractUserId(refreshToken);
+            String role = jwtService.extractRole(refreshToken);
             String pictureUrl = jwtService.extractPicture(refreshToken);
 
-            String newAccessToken = jwtService.generateAccessToken(email);
+            String newAccessToken = jwtService.generateAccessToken(userId, role, pictureUrl);
 
             Map<String, String> responseBody = new HashMap<>();
             responseBody.put("accessToken", newAccessToken);

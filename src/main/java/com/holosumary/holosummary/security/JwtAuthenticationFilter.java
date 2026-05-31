@@ -36,7 +36,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         final String jwt = authHeader.substring(7);
 
         if (jwtService.isTokenValid(jwt)) {
-            String email = jwtService.extractEmail(jwt);
+            String email = jwtService.extractUserId(jwt);
 
             // Set the user in the Spring Security context
             if (email != null && SecurityContextHolder.getContext().getAuthentication() == null) {
