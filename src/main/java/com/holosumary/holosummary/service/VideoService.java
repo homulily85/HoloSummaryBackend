@@ -9,6 +9,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalTime;
 import java.time.OffsetDateTime;
 
 @Service
@@ -32,23 +33,33 @@ public class VideoService {
                 sortBy, sortOrder));
     }
 
-    public Page<Video> getVideosAvailableAfter(OffsetDateTime availableAfter,
-                                               int pageNumber,
-                                               int pageSize,
-                                               String sortBy,
-                                               String sortOrder) {
-        return videoRepository.findByAvailableAtAfter(availableAfter,
-                getPageRequest(pageNumber, pageSize, sortBy, sortOrder));
+    public Page<Video> getVideosAvailableIn(OffsetDateTime date,
+                                            int pageNumber,
+                                            int pageSize,
+                                            String sortBy,
+                                            String sortOrder) {
+
+        OffsetDateTime startOfDay = date.with(LocalTime.MIN);
+        OffsetDateTime endOfDay = date.with(LocalTime.MAX);
+
+        return videoRepository.findVideoByAvailableAtIsBetween(
+                startOfDay,
+                endOfDay,
+                getPageRequest(pageNumber, pageSize, sortBy, sortOrder)
+        );
     }
 
-    public Page<Video> getVideoByStatusAndAvailableAfter(String status,
-                                                         OffsetDateTime availableAfter,
-                                                         int pageNumber,
-                                                         int pageSize,
-                                                         String sortBy,
-                                                         String sortOrder) {
-        return videoRepository.findByStatusAndAvailableAtAfter(status,
-                availableAfter, getPageRequest(pageNumber, pageSize,
+    public Page<Video> getVideoByStatusAndAvailableIn(String status,
+                                                      OffsetDateTime date,
+                                                      int pageNumber,
+                                                      int pageSize,
+                                                      String sortBy,
+                                                      String sortOrder) {
+        OffsetDateTime startOfDay = date.with(LocalTime.MIN);
+        OffsetDateTime endOfDay = date.with(LocalTime.MAX);
+
+        return videoRepository.findByStatusAndAvailableAtBetween(status,
+                startOfDay, endOfDay, getPageRequest(pageNumber, pageSize,
                         sortBy, sortOrder));
     }
 

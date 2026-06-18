@@ -12,7 +12,10 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
 import java.time.OffsetDateTime;
+import java.time.ZoneId;
+import java.time.ZoneOffset;
 
 @RestController
 @RequestMapping("/api/")
@@ -30,21 +33,31 @@ public class ScheduleController {
             @Min(0) int pageNumber,
             @RequestParam(value = "status", required = false)
             @Size(max = 16) String status,
-            @RequestParam(value = "availableAfter", required = false)
-            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) OffsetDateTime availableAfter,
+            @RequestParam(value = "date", required = false)
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate dateParam,
+            @RequestParam(value = "timezone", defaultValue = "UTC") String timezoneStr,
             @RequestParam(value = "sortBy", defaultValue = "availableAt") String sortBy,
             @RequestParam(value = "sortOrder", defaultValue = "desc") String sortOrder) {
-        int mask = (status != null ? 1 : 0) | (availableAfter != null ? 2 : 0);
+
+        OffsetDateTime date = null;
+        if (dateParam != null) {
+            try {
+                ZoneId zoneId = ZoneId.of(timezoneStr);
+                date = dateParam.atStartOfDay(zoneId).toOffsetDateTime();
+            } catch (Exception e) {
+                date = dateParam.atStartOfDay(ZoneOffset.UTC).toOffsetDateTime();
+            }
+        }
+
+        int mask = (status != null ? 1 : 0) | (date != null ? 2 : 0);
         Page<Video> videos = switch (mask) {
-            case 0 -> videoService.getAllVideos(pageNumber, pageSize, sortBy,
-                    sortOrder);
+            case 0 -> videoService.getAllVideos(pageNumber, pageSize,
+                    sortBy, sortOrder);
             case 1 -> videoService.getVideosByStatus(status, pageNumber,
                     pageSize, sortBy, sortOrder);
-            case 2 -> videoService.getVideosAvailableAfter(availableAfter,
-                    pageNumber, pageSize,
-                    sortBy, sortOrder);
-            default -> videoService.getVideoByStatusAndAvailableAfter(status,
-                    availableAfter,
+            case 2 -> videoService.getVideosAvailableIn(date, pageNumber,
+                    pageSize, sortBy, sortOrder);
+            default -> videoService.getVideoByStatusAndAvailableIn(status, date,
                     pageNumber, pageSize, sortBy, sortOrder);
         };
 
