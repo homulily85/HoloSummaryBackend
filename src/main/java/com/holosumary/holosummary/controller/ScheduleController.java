@@ -1,6 +1,6 @@
 package com.holosumary.holosummary.controller;
 
-import com.holosumary.holosummary.dto.video.VideoResponseDTO;
+import com.holosumary.holosummary.model.Video;
 import com.holosumary.holosummary.service.VideoService;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
@@ -9,12 +9,10 @@ import lombok.AllArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.OffsetDateTime;
-import java.util.Objects;
 
 @RestController
 @RequestMapping("/api/")
@@ -25,8 +23,7 @@ public class ScheduleController {
     private final VideoService videoService;
 
     @GetMapping("/schedule")
-    public ResponseEntity<Page<VideoResponseDTO>> getSchedule(
-            Authentication authentication,
+    public ResponseEntity<Page<Video>> getSchedule(
             @RequestParam(value = "pageSize", defaultValue = "25")
             @Min(1) @Max(100) int pageSize,
             @RequestParam(value = "pageNumber", defaultValue = "0")
@@ -37,39 +34,26 @@ public class ScheduleController {
             @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) OffsetDateTime availableAfter,
             @RequestParam(value = "sortBy", defaultValue = "availableAt") String sortBy,
             @RequestParam(value = "sortOrder", defaultValue = "desc") String sortOrder) {
-        Integer userId = null;
-        if (authentication != null && authentication.isAuthenticated()) {
-            userId =
-                    Integer.valueOf(Objects.requireNonNull(authentication.getPrincipal()).toString());
-        }
-
         int mask = (status != null ? 1 : 0) | (availableAfter != null ? 2 : 0);
-        Page<VideoResponseDTO> videos = switch (mask) {
+        Page<Video> videos = switch (mask) {
             case 0 -> videoService.getAllVideos(pageNumber, pageSize, sortBy,
-                    sortOrder, userId);
+                    sortOrder);
             case 1 -> videoService.getVideosByStatus(status, pageNumber,
-                    pageSize, sortBy, sortOrder, userId);
+                    pageSize, sortBy, sortOrder);
             case 2 -> videoService.getVideosAvailableAfter(availableAfter,
                     pageNumber, pageSize,
-                    sortBy, sortOrder, userId);
+                    sortBy, sortOrder);
             default -> videoService.getVideoByStatusAndAvailableAfter(status,
                     availableAfter,
-                    pageNumber, pageSize, sortBy, sortOrder, userId);
+                    pageNumber, pageSize, sortBy, sortOrder);
         };
 
         return ResponseEntity.ok(videos);
     }
 
     @GetMapping("/schedule/{id}")
-    public ResponseEntity<VideoResponseDTO> getVideo(@PathVariable String id,
-                                                     Authentication authentication) {
-        Integer userId = null;
-        if (authentication != null && authentication.isAuthenticated()) {
-            userId =
-                    Integer.valueOf(Objects.requireNonNull(authentication.getPrincipal()).toString());
-        }
-
-        var video = videoService.getVideoById(id, userId);
+    public ResponseEntity<Video> getVideo(@PathVariable String id) {
+        var video = videoService.getVideoById(id);
         return ResponseEntity.ok(video);
     }
 }

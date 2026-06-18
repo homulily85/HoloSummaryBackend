@@ -23,6 +23,10 @@ public class UserService {
         return userRepository.findByEmail(email);
     }
 
+    public User findUserById(Integer id) {
+        return userRepository.findById(id).orElse(null);
+    }
+
     public User createUser(User user) {
         return userRepository.save(user);
     }
@@ -36,7 +40,11 @@ public class UserService {
             throw new NotFoundException("Channel not found: " + channelId);
         }
 
-        user.getFavoriteChannels().add(channel);
+        var favourites = user.getFavoriteChannels();
+        if (favourites.contains(channel)) {
+            return;
+        }
+        favourites.add(channel);
         userRepository.save(user);
     }
 
