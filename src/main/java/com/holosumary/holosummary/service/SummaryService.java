@@ -4,49 +4,68 @@ import com.holosumary.holosummary.client.OpenRouterApiClient;
 import com.holosumary.holosummary.exception.ExternalServiceException;
 import com.holosumary.holosummary.exception.NotFoundException;
 import com.holosumary.holosummary.model.Summary;
+import com.holosumary.holosummary.model.Video;
 import com.holosumary.holosummary.repository.SummaryRepository;
 import com.holosumary.holosummary.repository.VideoRepository;
-import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
 
+@Slf4j
 @Service
-@AllArgsConstructor
 public class SummaryService {
     private final SummaryRepository summaryRepository;
     private final VideoRepository videoRepository;
     private final TranscriptService transcriptService;
     private final OpenRouterApiClient openRouterApiClient;
 
-    // Store locks per videoId
-    private final ConcurrentMap<String, Lock> locks = new ConcurrentHashMap<>();
+    private final ConcurrentMap<String, Boolean> inProgress = new ConcurrentHashMap<>();
 
-    public Summary getSummary(String videoId) {
+    public SummaryService(SummaryRepository summaryRepository,
+                          VideoRepository videoRepository,
+                          TranscriptService transcriptService,
+                          OpenRouterApiClient openRouterApiClient) {
+        this.summaryRepository = summaryRepository;
+        this.videoRepository = videoRepository;
+        this.transcriptService = transcriptService;
+        this.openRouterApiClient = openRouterApiClient;
+    }
+
+    public Optional<Summary> getSummary(String videoId) {
         var video = videoRepository.findById(videoId)
                 .orElseThrow(() -> new NotFoundException("Video not found: " + videoId));
 
-        // 1st Check (Fast path without locking)
         var oldSummary = summaryRepository.getSummariesByVideo(video);
         if (oldSummary != null) {
-            return oldSummary;
+            return Optional.of(oldSummary);
         }
 
-        // Acquire lock for this specific videoId
-        Lock lock = locks.computeIfAbsent(videoId, k -> new ReentrantLock());
-        lock.lock();
+        if (inProgress.putIfAbsent(videoId, true) == null) {
+            CompletableFuture.runAsync(() -> generateSummaryBackground(videoId));
+        }
+
+        return Optional.empty();
+    }
+
+    private void generateSummaryBackground(String videoId) {
         try {
-            // 2nd Check (Inside lock: in case another thread just finished generating it)
-            oldSummary = summaryRepository.getSummariesByVideo(video);
-            if (oldSummary != null) {
-                return oldSummary;
+            Video video = videoRepository.findWithDetailsById(videoId).orElse(null);
+
+            if (video == null) {
+                log.warn("Video {} no longer exists. Aborting background summary.", videoId);
+                return;
             }
 
-            // Generate summary via OpenRouter API
+            if (summaryRepository.getSummariesByVideo(video) != null) {
+                return;
+            }
+
             var transcript = transcriptService.getTranscript(videoId, "ja");
+            transcript.setVideo(video);
             var dto = openRouterApiClient.fetchSummary(transcript);
 
             if (dto == null) {
@@ -61,9 +80,12 @@ public class SummaryService {
             summary.setTotalTokens(dto.getUsage().getTotalTokens());
             summary.setModel(dto.getModel());
 
-            return summaryRepository.save(summary);
+            summaryRepository.save(summary);
+
+        } catch (Exception e) {
+            log.error("Failed to generate summary for video {}: {}", videoId, e.getMessage(), e);
         } finally {
-            lock.unlock();
+            inProgress.remove(videoId);
         }
     }
 }

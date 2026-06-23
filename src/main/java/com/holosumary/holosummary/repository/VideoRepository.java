@@ -3,6 +3,7 @@ package com.holosumary.holosummary.repository;
 import com.holosumary.holosummary.model.Video;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.time.OffsetDateTime;
@@ -23,4 +24,7 @@ public interface VideoRepository extends JpaRepository<Video, String> {
                                                   OffsetDateTime availableAtAfter,
                                                   OffsetDateTime availableAtBefore,
                                                   Pageable pageable);
+
+    @EntityGraph(attributePaths = {"channel", "mentions"})
+    Optional<Video> findWithDetailsById(String id);
 }
