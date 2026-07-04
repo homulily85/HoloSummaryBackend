@@ -37,8 +37,8 @@ jobs:
           host: ${{ secrets.SERVER_HOST }}
           username: ${{ secrets.SERVER_USERNAME }}
           key: ${{ secrets.SERVER_SSH_KEY }}
-          source: "prod.docker-compose.yml, nginx.conf.template"
-          target: "~/holosummary-backend/"
+          source: "prod.docker-compose.yml,nginx.conf"
+          target: "~/holosummary/"
 
       # 4. Connect to the server, authenticate, pull, and run
       - name: Execute Docker Compose on Server
@@ -48,27 +48,31 @@ jobs:
           username: ${{ secrets.SERVER_USERNAME }}
           key: ${{ secrets.SERVER_SSH_KEY }}
           script: |
-            cd ~/holosummary-backend/
+            mkdir -p ~/holosummary/
+            cd ~/holosummary/
             
-            # Create/Overwrite the .env file with secrets from GitHub
-            echo "DB_USERNAME=${{ secrets.DB_USERNAME }}" > .env
-            echo "DB_PASSWORD=${{ secrets.DB_PASSWORD }}" >> .env
-            echo "OPEN_ROUTER_API_KEY=${{ secrets.OPEN_ROUTER_API_KEY }}" >> .env
-            echo "GOOGLE_CLIENT_ID=${{ secrets.GOOGLE_CLIENT_ID }}" >> .env
-            echo "GOOGLE_CLIENT_SECRET=${{ secrets.GOOGLE_CLIENT_SECRET }}" >> .env
-            echo "JWT_SECRET_KEY=${{ secrets.JWT_SECRET_KEY }}" >> .env
-            echo "FRONTEND_URL=${{ secrets.FRONTEND_URL }}" >> .env
-            echo "WINDOWS_TAILSCALE_IP=${{ secrets.WINDOWS_TAILSCALE_IP }}" >> .env
-            echo "PROXY_PORT=${{ secrets.PROXY_PORT }}" >> .env
-            echo "SERVER_IP=${{ secrets.SERVER_HOST }}" >> .env
-            echo "TUNNEL_TOKEN=${{ secrets.TUNNEL_TOKEN }}" >> .env
+            # Create/Overwrite the .env file securely
+            cat <<EOF > .env
+            DB_USERNAME=${{ secrets.DB_USERNAME }}
+            DB_PASSWORD=${{ secrets.DB_PASSWORD }}
+            OPEN_ROUTER_API_KEY=${{ secrets.OPEN_ROUTER_API_KEY }}
+            GOOGLE_CLIENT_ID=${{ secrets.GOOGLE_CLIENT_ID }}
+            GOOGLE_CLIENT_SECRET=${{ secrets.GOOGLE_CLIENT_SECRET }}
+            JWT_SECRET_KEY=${{ secrets.JWT_SECRET_KEY }}
+            FRONTEND_URL=${{ secrets.FRONTEND_URL }}
+            WINDOWS_TAILSCALE_IP=${{ secrets.WINDOWS_TAILSCALE_IP }}
+            PROXY_PORT=${{ secrets.PROXY_PORT }}
+            TUNNEL_TOKEN=${{ secrets.TUNNEL_TOKEN }}
+            EOF
             
-            # Log the server into GHCR so it has permission to pull your private image
+            # Log the server into GHCR
             echo "${{ secrets.GHCR_PAT }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
             
-            # Pull and start using the specific prod file
+            # Pull new images
             docker compose -f prod.docker-compose.yml pull
-            docker compose -f prod.docker-compose.yml up -d
             
-            # Clean up old images
+            # Start containers (add --no-build for safety)
+            docker compose -f prod.docker-compose.yml up -d --no-build
+            
+            # Clean up old images to save disk space
             docker image prune -f

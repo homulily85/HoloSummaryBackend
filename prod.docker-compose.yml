@@ -1,29 +1,30 @@
 services:
   nginx:
     image: nginx:alpine
-    container_name: holo-nginx
-    environment:
-      - SERVER_IP=${SERVER_IP}
+    container_name: holosummary-nginx
     volumes:
-      - ./nginx.conf.template:/etc/nginx/templates/default.conf.template:ro
+      - ./nginx.conf:/etc/nginx/conf.d/default.conf:ro
     depends_on:
-      - holo-summary
+      - holosummary
     restart: unless-stopped
 
   cloudflared:
     image: cloudflare/cloudflared:latest
-    container_name: holo-summary-cloudflared
+    container_name: holosummary-cloudflared
     restart: unless-stopped
     command: tunnel --no-autoupdate run
     environment:
       - TUNNEL_TOKEN=${TUNNEL_TOKEN}
+    depends_on:
+      - nginx
+      - holosummary
 
-  holo-summary:
+  holosummary:
     build:
       context: .
       dockerfile: prod.Dockerfile
     image: ghcr.io/homulily85/holosummary:latest
-    container_name: holo-summary
+    container_name: holosummary
     environment:
       - SPRING_PROFILES_ACTIVE=prod
       - SPRING_DATASOURCE_URL=jdbc:postgresql://db:5432/holo_summary
@@ -44,7 +45,7 @@ services:
     build:
       context: ./python-transcript-crawler
       dockerfile: Dockerfile
-    container_name: transcript-crawler
+    container_name: holosummary-transcript-crawler
     environment:
       - WINDOWS_TAILSCALE_IP=${WINDOWS_TAILSCALE_IP}
       - PROXY_PORT=${PROXY_PORT}
@@ -53,7 +54,7 @@ services:
 
   db:
     image: postgres:17.9
-    container_name: holo-summary-db
+    container_name: holosummary-db
     environment:
       POSTGRES_USER: ${DB_USERNAME}
       POSTGRES_PASSWORD: ${DB_PASSWORD}
@@ -66,10 +67,6 @@ services:
       timeout: 5s
       retries: 5
     restart: unless-stopped
-
-networks:
-  tunnel_net:
-    driver: bridge
 
 volumes:
   postgres-data:
