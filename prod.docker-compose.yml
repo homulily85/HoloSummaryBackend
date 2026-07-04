@@ -2,8 +2,6 @@ services:
   nginx:
     image: nginx:alpine
     container_name: holo-nginx
-    ports:
-      - "80:80"
     environment:
       - SERVER_IP=${SERVER_IP}
     volumes:
@@ -11,6 +9,16 @@ services:
     depends_on:
       - holo-summary
     restart: unless-stopped
+
+  cloudflared:
+    image: cloudflare/cloudflared:latest
+    container_name: holo-summary-cloudflared
+    restart: unless-stopped
+    command: tunnel --no-autoupdate run
+    environment:
+      - TUNNEL_TOKEN=${TUNNEL_TOKEN}
+    networks:
+      - tunnel_net
 
   holo-summary:
     build:
@@ -60,6 +68,10 @@ services:
       timeout: 5s
       retries: 5
     restart: unless-stopped
+
+networks:
+  tunnel_net:
+    driver: bridge
 
 volumes:
   postgres-data:
