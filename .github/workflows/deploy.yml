@@ -37,8 +37,8 @@ jobs:
           host: ${{ secrets.SERVER_HOST }}
           username: ${{ secrets.SERVER_USERNAME }}
           key: ${{ secrets.SERVER_SSH_KEY }}
-          source: "prod.docker-compose.yml" # Add any other needed configs here, comma-separated (e.g., "docker-compose.yml,nginx.conf")
-          target: "/opt/holosummary-backend/"
+          source: "prod.docker-compose.yml, nginx.conf.template"
+          target: "~/holosummary-backend/"
 
       # 4. Connect to the server, authenticate, pull, and run
       - name: Execute Docker Compose on Server
@@ -48,7 +48,7 @@ jobs:
           username: ${{ secrets.SERVER_USERNAME }}
           key: ${{ secrets.SERVER_SSH_KEY }}
           script: |
-            cd /opt/holosummary-backend/
+            cd ~/holosummary-backend/
             
             # Create/Overwrite the .env file with secrets from GitHub
             echo "DB_USERNAME=${{ secrets.DB_USERNAME }}" > .env
@@ -60,7 +60,7 @@ jobs:
             echo "FRONTEND_URL=${{ secrets.FRONTEND_URL }}" >> .env
             echo "WINDOWS_TAILSCALE_IP=${{ secrets.WINDOWS_TAILSCALE_IP }}" >> .env
             echo "PROXY_PORT=${{ secrets.PROXY_PORT }}" >> .env
-            echo "SERVER_IP=${{ secrets.SERVER_IP }}" >> .env
+            echo "SERVER_IP=${{ secrets.SERVER_HOST }}" >> .env
             
             # Log the server into GHCR so it has permission to pull your private image
             echo "${{ secrets.GHCR_PAT }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
