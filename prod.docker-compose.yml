@@ -1,13 +1,23 @@
 services:
+  nginx:
+    image: nginx:alpine
+    container_name: holo-nginx
+    ports:
+      - "80:80"
+    environment:
+      - SERVER_IP=${SERVER_IP}
+    volumes:
+      - ./nginx.conf.template:/etc/nginx/templates/default.conf.template:ro
+    depends_on:
+      - holo-summary
+    restart: unless-stopped
+
   holo-summary:
     build:
       context: .
       dockerfile: prod.Dockerfile
     image: ghcr.io/homulily85/holosummary:latest
-
     container_name: holo-summary
-    ports:
-      - "127.0.0.1:8080:8080" # Secured: Only accessible via Nginx proxy
     environment:
       - SPRING_PROFILES_ACTIVE=prod
       - SPRING_DATASOURCE_URL=jdbc:postgresql://db:5432/holo_summary
