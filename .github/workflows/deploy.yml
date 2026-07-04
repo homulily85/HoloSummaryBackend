@@ -61,6 +61,7 @@ jobs:
             echo "WINDOWS_TAILSCALE_IP=${{ secrets.WINDOWS_TAILSCALE_IP }}" >> .env
             echo "PROXY_PORT=${{ secrets.PROXY_PORT }}" >> .env
             echo "SERVER_IP=${{ secrets.SERVER_HOST }}" >> .env
+            echo "TUNNEL_TOKEN=${{ secrets.TUNNEL_TOKEN }}" >> .env
             
             # Log the server into GHCR so it has permission to pull your private image
             echo "${{ secrets.GHCR_PAT }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
