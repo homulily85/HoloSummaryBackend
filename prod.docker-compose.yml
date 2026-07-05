@@ -27,9 +27,9 @@ services:
     container_name: holosummary
     environment:
       - SPRING_PROFILES_ACTIVE=prod
-      - SPRING_DATASOURCE_URL=jdbc:postgresql://db:5432/holo_summary
-      - SPRING_DATASOURCE_USERNAME=${DB_USERNAME}
-      - SPRING_DATASOURCE_PASSWORD=${DB_PASSWORD}
+      - DATABASE_URL=${DB_URL}
+      - DATABASE_USERNAME=${DB_USERNAME}
+      - DATABASE_PASSWORD=${DB_PASSWORD}
       - TRANSCRIPTION_API_URL=http://transcript-crawler:8000/api/transcript
       - OPEN_ROUTER_API_KEY=${OPEN_ROUTER_API_KEY}
       - GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID}
@@ -51,22 +51,3 @@ services:
       - PROXY_PORT=${PROXY_PORT}
     image: ghcr.io/homulily85/transcript-crawler:latest
     restart: unless-stopped
-
-  db:
-    image: postgres:17.9
-    container_name: holosummary-db
-    environment:
-      POSTGRES_USER: ${DB_USERNAME}
-      POSTGRES_PASSWORD: ${DB_PASSWORD}
-      POSTGRES_DB: holo_summary
-    volumes:
-      - postgres-data:/var/lib/postgresql/data
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${DB_USERNAME} -d holo_summary"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-    restart: unless-stopped
-
-volumes:
-  postgres-data:

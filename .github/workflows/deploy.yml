@@ -53,6 +53,7 @@ jobs:
             
             # Create/Overwrite the .env file securely
             cat <<EOF > .env
+            DB_URL=${{ secrets.DB_URL }}
             DB_USERNAME=${{ secrets.DB_USERNAME }}
             DB_PASSWORD=${{ secrets.DB_PASSWORD }}
             OPEN_ROUTER_API_KEY=${{ secrets.OPEN_ROUTER_API_KEY }}
