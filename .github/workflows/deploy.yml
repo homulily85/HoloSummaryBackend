@@ -61,6 +61,7 @@ jobs:
             GOOGLE_CLIENT_SECRET=${{ secrets.GOOGLE_CLIENT_SECRET }}
             JWT_SECRET_KEY=${{ secrets.JWT_SECRET_KEY }}
             FRONTEND_URL=${{ secrets.FRONTEND_URL }}
+            FRONTEND_DOMAIN=${{ secrets.FRONTEND_DOMAIN }}
             WINDOWS_TAILSCALE_IP=${{ secrets.WINDOWS_TAILSCALE_IP }}
             PROXY_PORT=${{ secrets.PROXY_PORT }}
             TUNNEL_TOKEN=${{ secrets.TUNNEL_TOKEN }}

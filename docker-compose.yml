@@ -17,6 +17,7 @@ services:
       - GOOGLE_CLIENT_SECRET=${GOOGLE_CLIENT_SECRET}
       - JWT_SECRET_KEY=${JWT_SECRET_KEY}
       - FRONTEND_URL=${FRONTEND_URL}
+      - FRONTEND_DOMAIN=${FRONTEND_DOMAIN}
     volumes:
       - ./:/app
       - maven-cache:/root/.m2

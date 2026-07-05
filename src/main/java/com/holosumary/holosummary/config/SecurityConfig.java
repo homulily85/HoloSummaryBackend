@@ -18,15 +18,15 @@ import java.util.List;
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
-    private final String FRONTEND_URL;
+    private final String FRONTEND_DOMAIN;
 
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
     private final OAuth2LoginSuccessHandler oAuth2LoginSuccessHandler;
 
-    public SecurityConfig(@Value("${application.frontend.url}") String frontendUrl,
+    public SecurityConfig(@Value("${application.frontend.domain}") String frontendDomain,
                           JwtAuthenticationFilter jwtAuthenticationFilter,
                           OAuth2LoginSuccessHandler oAuth2LoginSuccessHandler) {
-        FRONTEND_URL = frontendUrl;
+        FRONTEND_DOMAIN = frontendDomain;
         this.jwtAuthenticationFilter = jwtAuthenticationFilter;
         this.oAuth2LoginSuccessHandler = oAuth2LoginSuccessHandler;
     }
@@ -37,7 +37,7 @@ public class SecurityConfig {
                 .csrf(AbstractHttpConfigurer::disable)
                 .cors(cors -> cors.configurationSource(request -> {
                     var corsConfiguration = new CorsConfiguration();
-                    corsConfiguration.setAllowedOriginPatterns(List.of(FRONTEND_URL));
+                    corsConfiguration.setAllowedOriginPatterns(List.of(FRONTEND_DOMAIN));
                     corsConfiguration.setAllowedMethods(List.of("GET", "POST"
                             , "PUT", "DELETE", "OPTIONS"));
                     corsConfiguration.setAllowedHeaders(List.of("*"));
