@@ -17,7 +17,6 @@ services:
       - TUNNEL_TOKEN=${TUNNEL_TOKEN}
     depends_on:
       - nginx
-      - holosummary
 
   holosummary:
     build:
@@ -36,9 +35,7 @@ services:
       - GOOGLE_CLIENT_SECRET=${GOOGLE_CLIENT_SECRET}
       - JWT_SECRET_KEY=${JWT_SECRET_KEY}
       - FRONTEND_URL=${FRONTEND_URL}
-    depends_on:
-      db:
-        condition: service_healthy
+
     restart: unless-stopped
 
   transcript-crawler:
