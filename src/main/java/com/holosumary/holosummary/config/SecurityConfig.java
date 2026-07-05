@@ -24,7 +24,7 @@ public class SecurityConfig {
     private final OAuth2LoginSuccessHandler oAuth2LoginSuccessHandler;
 
     public SecurityConfig(@Value("${application.frontend.url}") String frontendUrl,
-                           JwtAuthenticationFilter jwtAuthenticationFilter,
+                          JwtAuthenticationFilter jwtAuthenticationFilter,
                           OAuth2LoginSuccessHandler oAuth2LoginSuccessHandler) {
         FRONTEND_URL = frontendUrl;
         this.jwtAuthenticationFilter = jwtAuthenticationFilter;
@@ -38,15 +38,17 @@ public class SecurityConfig {
                 .cors(cors -> cors.configurationSource(request -> {
                     var corsConfiguration = new CorsConfiguration();
                     corsConfiguration.setAllowedOriginPatterns(List.of(FRONTEND_URL));
-                    corsConfiguration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+                    corsConfiguration.setAllowedMethods(List.of("GET", "POST"
+                            , "PUT", "DELETE", "OPTIONS"));
                     corsConfiguration.setAllowedHeaders(List.of("*"));
                     corsConfiguration.setAllowCredentials(true);
                     return corsConfiguration;
                 }))
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(authz -> authz
-                        .requestMatchers("/api/auth/**", "/login/**", "/oauth2/**", "/api" +
-                                "/schedule","/", "/api/channels").permitAll()
+                        .requestMatchers("/api/auth/**", "/login/**",
+                                "/oauth2/**", "/api" +
+                                "/schedule", "/", "/api/channels").permitAll()
                         .anyRequest().authenticated()
                 )
                 .oauth2Login(oauth2 -> oauth2
@@ -54,7 +56,6 @@ public class SecurityConfig {
                 )
                 .addFilterBefore(jwtAuthenticationFilter,
                         UsernamePasswordAuthenticationFilter.class);
-
         return http.build();
     }
 }
