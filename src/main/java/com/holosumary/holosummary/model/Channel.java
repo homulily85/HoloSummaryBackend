@@ -1,17 +1,21 @@
 package com.holosumary.holosummary.model;
 
 import com.fasterxml.jackson.annotation.JsonAlias;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import jakarta.persistence.*;
 import lombok.Data;
 
 @Data
 @Entity
+@Table(name = "channels")
 public class Channel {
     @Id
-    private String id;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @JsonIgnore
+    private Integer id;
+
+    @Column(unique = true, nullable = false)
+    private String channelId;
 
     private String name;
 

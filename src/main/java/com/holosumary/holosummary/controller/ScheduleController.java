@@ -66,7 +66,7 @@ public class ScheduleController {
 
     @GetMapping("/schedule/{id}")
     public ResponseEntity<Video> getVideo(@PathVariable String id) {
-        var video = videoService.getVideoById(id);
+        var video = videoService.getVideoByVideoId(id);
         return ResponseEntity.ok(video);
     }
 }

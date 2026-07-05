@@ -21,7 +21,6 @@ class RequestBody(BaseModel):
     videoId: str
     languageCode: str
 
-
 def process_transcript_snippets(transcript_data):
     text = ""
     for snippet in transcript_data:
@@ -46,11 +45,6 @@ async def fetch_transcript(request_body: RequestBody):
             "isGenerated": transcript.is_generated
         }
 
-    except RequestBlocked:
-        raise HTTPException(status_code=403, detail="Request blocked by YouTube. Please try again later.")
-    except IpBlocked:
-        raise HTTPException(status_code=500,
-                            detail="The IP transcript crawler service is blocked by YouTube. Please try again later.")
     except NoTranscriptFound:
         raise HTTPException(status_code=404, detail="No transcript found for the given video ID and language code.")
     except TranscriptsDisabled:
@@ -59,10 +53,5 @@ async def fetch_transcript(request_body: RequestBody):
         raise HTTPException(status_code=404, detail="The video is unplayable.")
     except VideoUnavailable:
         raise HTTPException(status_code=404, detail="The video is unavailable.")
-
-    except requests.exceptions.ProxyError:
-        raise HTTPException(status_code=503, detail="The residential proxy (Windows laptop) is offline or unreachable.")
-    except requests.exceptions.ConnectTimeout:
-        raise HTTPException(status_code=504, detail="Connection to the residential proxy timed out.")
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))

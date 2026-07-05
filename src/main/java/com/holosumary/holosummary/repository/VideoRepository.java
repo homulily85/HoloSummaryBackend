@@ -12,7 +12,7 @@ import java.util.Optional;
 public interface VideoRepository extends JpaRepository<Video, String> {
     Page<Video> findAll(Pageable pageable);
 
-    Optional<Video> findById(String id);
+    Optional<Video> findByVideoId(String videoId);
 
     Page<Video> findByStatus(String status, Pageable pageable);
 
@@ -26,5 +26,5 @@ public interface VideoRepository extends JpaRepository<Video, String> {
                                                   Pageable pageable);
 
     @EntityGraph(attributePaths = {"channel", "mentions"})
-    Optional<Video> findWithDetailsById(String id);
+    Optional<Video> findWithDetailsByVideoId(String videoId);
 }

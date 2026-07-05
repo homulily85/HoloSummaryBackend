@@ -62,14 +62,11 @@ public class ApiExceptionHandler {
 
         if (status.is5xxServerError()) {
             logger.error("External service 5xx error at {}: {}", request.getRequestURI(), ex.getResponseBody(), ex);
-        } else {
-            logger.warn("External service error at {}: {}", request.getRequestURI(), ex.getResponseBody());
         }
 
         return ResponseEntity.status(status)
                 .body(new ApiError(ex.getMessage(), status.getReasonPhrase(),
-                        request.getRequestURI(),
-                        Instant.now(), List.of()));
+                        request.getRequestURI(), Instant.now(), List.of()));
     }
 
     @ExceptionHandler(HttpClientErrorException.class)

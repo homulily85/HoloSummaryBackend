@@ -1,6 +1,7 @@
 package com.holosumary.holosummary.model;
 
 import com.fasterxml.jackson.annotation.JsonAlias;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.Data;
 
@@ -9,9 +10,15 @@ import java.util.List;
 
 @Data
 @Entity
+@Table(name = "videos")
 public class Video {
     @Id
-    private String id;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @JsonIgnore
+    private Integer id;
+
+    @Column(unique = true, nullable = false)
+    private String videoId;
 
     private String title;
 

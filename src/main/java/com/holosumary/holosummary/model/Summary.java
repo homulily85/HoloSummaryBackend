@@ -6,6 +6,7 @@ import lombok.Data;
 
 @Entity
 @Data
+@Table(name = "summaries")
 public class Summary {
     @Id
     @JsonIgnore

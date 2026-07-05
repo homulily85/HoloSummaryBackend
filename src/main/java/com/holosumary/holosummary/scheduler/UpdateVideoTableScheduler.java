@@ -51,8 +51,9 @@ public class UpdateVideoTableScheduler {
         var update_start = System.currentTimeMillis();
 
         // Filter for non-holo channel
-        Map<String, Channel> existingChannels = channelRepository.findAll().stream()
-                .collect(Collectors.toMap(Channel::getId, t -> t));
+        Map<String, Channel> existingChannels =
+                channelRepository.findAll().stream()
+                .collect(Collectors.toMap(Channel::getChannelId, t -> t));
 
         List<Video> toSave = fetchedVideos.stream()
                 .map(v -> {
@@ -60,13 +61,15 @@ public class UpdateVideoTableScheduler {
                             if (t == null || t.getId() == null) {
                                 return null;
                             }
-                            var channel = existingChannels.getOrDefault(t.getId(), null);
+                            var channel =
+                                    existingChannels.getOrDefault(t.getId(),
+                                            null);
                             if (channel == null) {
                                 return null;
                             }
 
                             var video = new Video();
-                            video.setId(v.getId());
+                            video.setVideoId(v.getId());
                             video.setTitle(v.getTitle());
                             video.setType(v.getType());
                             video.setTopic(v.getTopic());

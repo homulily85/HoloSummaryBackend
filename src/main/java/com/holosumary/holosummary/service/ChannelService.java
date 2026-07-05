@@ -18,7 +18,7 @@ public class ChannelService {
                 ".orderValue"));
     }
 
-    public Channel getChannelById(String id) {
-        return channelRepository.findById(id).orElse(null);
+    public Channel getChannelByChannelId(String id) {
+        return channelRepository.getChannelByChannelId(id).orElse(null);
     }
 }

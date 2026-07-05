@@ -63,8 +63,8 @@ public class VideoService {
                         sortBy, sortOrder));
     }
 
-    public Video getVideoById(String id) {
-        return videoRepository.findById(id)
+    public Video getVideoByVideoId(String id) {
+        return videoRepository.findByVideoId(id)
                 .orElseThrow(() -> new NotFoundException("Video not found " +
                         "with id: " + id));
     }

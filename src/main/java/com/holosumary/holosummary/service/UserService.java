@@ -35,7 +35,7 @@ public class UserService {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new NotFoundException("User not found"));
 
-        Channel channel = channelService.getChannelById(channelId);
+        Channel channel = channelService.getChannelByChannelId(channelId);
         if (channel == null) {
             throw new NotFoundException("Channel not found: " + channelId);
         }
@@ -50,7 +50,7 @@ public class UserService {
 
     public void removeFavoriteChannel(Integer userId, String channelId) {
         User user = userRepository.findById(userId).orElse(null);
-        Channel channel = channelService.getChannelById(channelId);
+        Channel channel = channelService.getChannelByChannelId(channelId);
 
         if (user != null && channel != null) {
             user.getFavoriteChannels().remove(channel);
