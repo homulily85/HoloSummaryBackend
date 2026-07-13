@@ -76,5 +76,8 @@ jobs:
             # Start containers (add --no-build for safety)
             docker compose -f prod.docker-compose.yml up -d --no-build
             
+            # Force Nginx to re-resolve the new container IPs
+            docker exec holosummary-nginx nginx -s reload
+            
             # Clean up old images to save disk space
             docker image prune -f
